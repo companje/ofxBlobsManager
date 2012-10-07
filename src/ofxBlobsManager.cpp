@@ -8,57 +8,65 @@
 
 ofxBlobsManager::ofxBlobsManager()
 {
-	maxMergeDis = 100; 
-	normalizePercentage = 1;	
-	
+	maxMergeDis = 100;
+	normalizePercentage = 1;
+
 	enableMinDetectedTimeFilter = true;
 	minDetectedTime = 500;
-	
+
 	enableUndetectedBlobs = true;
 	maxUndetectedTime = 500;
-	
+
 	giveLowestPossibleIDs = false;
 	maxNumBlobs = 9999;
-	
+
 	debugDrawCandidates = false;
-	
+
 	sequentialID = 0;
 	sequentialCandidateID = 0;
 }
 bool sortBlobsOnDis(ofxStoredBlobVO* blob1, ofxStoredBlobVO* blob2)
 {
-	return (blob1->dis < blob2->dis); 
+	return (blob1->dis < blob2->dis);
 }
 void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 {
 	//cout << "BlobsManager::update" << endl;
 	int numNewBlobs = newBlobs.size();
-	
+
 	int currentTime = ofGetElapsedTimeMillis();
-	
+
+    //remember prev pos for existing blobs
+    for( int i = 0; i < blobs.size(); i++ ) {
+		ofxStoredBlobVO& b = blobs.at(i);
+		b.pCentroid = b.centroid;
+        b.pTip = b.tip;
+        b.pTail = b.tail;
+    }
+
 	//cout << "  loop new blobs (" << numNewBlobs << ")" << endl;
-	for( int i = 0; i < numNewBlobs; i++ ) 
+	for( int i = 0; i < numNewBlobs; i++ )
 	{
 		ofxCvBlob& newBlob = newBlobs.at(i);
-		
+
 		// find blob that are close to new blob in blobs
 		vector<ofxStoredBlobVO*> closeBlobs = findCloseBlobs(newBlob,blobs);
-		
+
 		bool foundInStoredBlobs = closeBlobs.size() > 0;
-		if(foundInStoredBlobs)
+		if (foundInStoredBlobs)
 		{
 			// update stored blob
 			ofxStoredBlobVO * closestBlob = closeBlobs.at(0);
 			//cout << "      found matching stored blob: " << closestBlob->id << endl;
-			
-			int prevX = closestBlob->centroid.x;
-			int prevY = closestBlob->centroid.y;
-			
+
+			//closestBlob->pCentroid.x = closestBlob->centroid.x;
+			//closestBlob->pCentroid.y = closestBlob->centroid.y;
+
 			closestBlob->update(newBlob);
 			if(normalizePercentage < 1)
 			{
-				closestBlob->centroid.x = prevX*(1-normalizePercentage) + newBlob.centroid.x*normalizePercentage;
-				closestBlob->centroid.y = prevY*(1-normalizePercentage) + newBlob.centroid.y*normalizePercentage;
+				closestBlob->centroid.x = closestBlob->pCentroid.x*(1-normalizePercentage) + newBlob.centroid.x*normalizePercentage;
+				closestBlob->centroid.y = closestBlob->pCentroid.y*(1-normalizePercentage) + newBlob.centroid.y*normalizePercentage;
 			}
 			closestBlob->lastDetectedTime = currentTime;
 		}
@@ -84,8 +92,8 @@ void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 					//ofxStoredBlobVO * newCandidateBlob = new ofxStoredBlobVO(newBlob);
 					ofxStoredBlobVO newCandidateBlob(newBlob);
 					newCandidateBlob.id = sequentialCandidateID;
-					sequentialCandidateID++;	
-					
+					sequentialCandidateID++;
+
 					newCandidateBlob.iniDetectedTime = currentTime;
 					newCandidateBlob.lastDetectedTime = currentTime;
 					candidateBlobs.push_back(newCandidateBlob);
@@ -93,7 +101,7 @@ void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 					//cout << "        x: " << newCandidateBlob->centroid.x << ", y: " << newCandidateBlob->centroid.y << endl;
 				}
 			}
-			else 
+			else
 			{
 				// store the new blob
 				// we make a ofxStoredBlobVO out of the ofxCvBlob so we can store a id for example
@@ -102,7 +110,7 @@ void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 				if(!giveLowestPossibleIDs)
 				{
 					newStoredBlob.id = sequentialID;
-					sequentialID++;	
+					sequentialID++;
 				}
 				newStoredBlob.iniDetectedTime = currentTime;
 				newStoredBlob.lastDetectedTime = currentTime;
@@ -112,18 +120,18 @@ void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 			}
 
 		}
-		
+
 	}
-	
+
 	if(enableMinDetectedTimeFilter)
 	{
-		//cout << "  loop candidate blobs (" << candidateBlobs.size() << ") (check undetected and detected time)" << endl; 
-		for( int i = 0; i < candidateBlobs.size(); i++ ) 
+		//cout << "  loop candidate blobs (" << candidateBlobs.size() << ") (check undetected and detected time)" << endl;
+		for( int i = 0; i < candidateBlobs.size(); i++ )
 		{
 			ofxStoredBlobVO& candidateBlob = candidateBlobs.at(i);
 			int undetectedTime = currentTime-candidateBlob.lastDetectedTime;
 			int detectionTime = candidateBlob.lastDetectedTime-candidateBlob.iniDetectedTime;
-			//cout << "    candidateBlob: " << candidateBlob << " detectionTime: " << detectionTime << " undetectedTime: " << undetectedTime << endl; 
+			//cout << "    candidateBlob: " << candidateBlob << " detectionTime: " << detectionTime << " undetectedTime: " << undetectedTime << endl;
 			int maxUndetectedTime = (enableUndetectedBlobs)? this->maxUndetectedTime : 0;
 			if(undetectedTime > maxUndetectedTime)
 			{
@@ -138,7 +146,7 @@ void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 				if(!giveLowestPossibleIDs)
 				{
 					candidateBlob.id = sequentialID;
-					sequentialID++;	
+					sequentialID++;
 				}
 				else
 				{
@@ -150,13 +158,13 @@ void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 			}
 		}
 	}
-	
-	//cout << "  loop stored blobs (" << blobs.size() << ") (check time since last detection)" << endl; 
-	for( int i = 0; i < blobs.size(); i++ ) 
+
+	//cout << "  loop stored blobs (" << blobs.size() << ") (check time since last detection)" << endl;
+	for( int i = 0; i < blobs.size(); i++ )
 	{
 		ofxStoredBlobVO& blob = blobs.at(i);
 		int undetectedTime = currentTime-blob.lastDetectedTime;
-		//cout << "    blob: " << blob->id << " undetectedTime: " << undetectedTime << endl; 
+		//cout << "    blob: " << blob->id << " undetectedTime: " << undetectedTime << endl;
 		int maxUndetectedTime = (enableUndetectedBlobs)? this->maxUndetectedTime : 0;
 		//cout << "    this->maxUndetectedTime: " << this->maxUndetectedTime << endl;
 		//cout << "    local maxUndetectedTime: " << maxUndetectedTime << endl;
@@ -166,18 +174,18 @@ void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 			i--;
 		}
 	}
-	
-	// give lowest possible id's 
+
+	// give lowest possible id's
 	if(giveLowestPossibleIDs)
 	{
-		//cout << "  loop stored blobs (" << blobs.size() << ") (find lowest id)" << endl; 
-		for( int i = 0; i < blobs.size(); i++ ) 
+		//cout << "  loop stored blobs (" << blobs.size() << ") (find lowest id)" << endl;
+		for( int i = 0; i < blobs.size(); i++ )
 		{
 			ofxStoredBlobVO& blob = blobs.at(i);
 			if(blob.id == -1)
 			{
 				int lowestID = 0;
-				while(hasBlob(lowestID)) 
+				while(hasBlob(lowestID))
 				{
 					lowestID++;
 				}
@@ -191,12 +199,12 @@ void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 			}
 		}
 	}
-	
-	/*cout << "  loop resulting stored blobs (" << blobs.size() << ")" << endl; 
-	for( int i = 0; i < blobs.size(); i++ ) 
+
+	/*cout << "  loop resulting stored blobs (" << blobs.size() << ")" << endl;
+	for( int i = 0; i < blobs.size(); i++ )
 	{
 		ofxStoredBlobVO * blob = blobs.at(i);
-		//cout << "    blob: " << blob->id << " x: " << blob->centroid.x << " y: " << blob->centroid.y << endl;	
+		//cout << "    blob: " << blob->id << " x: " << blob->centroid.x << " y: " << blob->centroid.y << endl;
 	}*/
 }
 
@@ -207,24 +215,24 @@ vector<ofxStoredBlobVO*> ofxBlobsManager::findCloseBlobs(ofxCvBlob& newBlob,vect
 	int numBlobs = blobs.size();
 	//cout << "  loop stored (candidate) blobs (" << numBlobs << ")" << endl;
 	vector<ofxStoredBlobVO*> closeBlobs;
-	for( int j = 0; j < numBlobs; j++ ) 
+	for( int j = 0; j < numBlobs; j++ )
 	{
 		ofxStoredBlobVO& blob = blobs.at(j);
 		blob.dis = blob.centroid.distance(newBlob.centroid);
-		
+
 		//cout << "      " << blob->id << ": dis: " << blob->dis << endl;
 		if(blob.dis < maxMergeDis)
 			closeBlobs.push_back(&blob);
 	}
 	if(closeBlobs.size() > 0)
 		sort (closeBlobs.begin(), closeBlobs.end(), &sortBlobsOnDis);
-	
+
 	return closeBlobs;
 }
 
 bool ofxBlobsManager::hasBlob(int blobID)
 {
-	for( int i = 0; i < blobs.size(); i++ ) 
+	for( int i = 0; i < blobs.size(); i++ )
 	{
 		ofxStoredBlobVO& blob = blobs.at(i);
 		if(blob.id == blobID)
@@ -250,45 +258,61 @@ void ofxBlobsManager::debugDraw(int baseX, int baseY, int inputWidth, int inputH
 {
 	float scaleX = float(displayWidth)/float(inputWidth);
 	float scaleY = float(displayHeight)/float(inputHeight);
-	
+
 	//ofEnableAlphaBlending();
 	//ofSetHexColor(0x0036B7);
 	int numBlobs = blobs.size();
-	for( int i = 0; i < numBlobs; i++ ) 
+	for( int i = 0; i < numBlobs; i++ )
 	{
 		ofxStoredBlobVO& blob = blobs.at(i);
-		
+
 		int x = baseX+blob.centroid.x*scaleX;
 		int y = baseY+blob.centroid.y*scaleY;
-		
+
 		ofFill();
 		ofSetHexColor(0x00ffff);
-		ofCircle(x, y, 10);
+		//ofCircle(x, y, 10);
 
-		ofSetHexColor(0x000000);
+		ofSetHexColor(0xffffff);
 		if(blob.id >= 10) x -= 4;
-		ofDrawBitmapString(ofToString(blob.id),x-4,y+5);
+		ofDrawBitmapString(ofToString(blob.pTip),x-4,y+5); //blob.id
+
+        //tip
+		x = baseX+blob.tip.x*scaleX;
+		y = baseY+blob.tip.y*scaleY;
+
+		ofFill();
+		ofSetHexColor(0x00ff00);
+		ofCircle(x, y, 5);
+
+		//tail
+		x = baseX+blob.tail.x*scaleX;
+		y = baseY+blob.tail.y*scaleY;
+
+		ofFill();
+		ofSetHexColor(0xffff00);
+		ofCircle(x, y, 5);
 	}
-	
+
 	if(debugDrawCandidates)
 	{
 		ofEnableAlphaBlending();
 		int numCandicateBlobs = candidateBlobs.size();
-		for( int i = 0; i < numCandicateBlobs; i++ ) 
+		for( int i = 0; i < numCandicateBlobs; i++ )
 		{
 			ofxStoredBlobVO& candidateBlob = candidateBlobs.at(i);
-			
+
 			int x = baseX+candidateBlob.centroid.x*scaleX;
 			int y = baseY+candidateBlob.centroid.y*scaleY;
-			
+
 			ofFill();
-			ofSetColor(0,255,255,125);
+			ofSetColor(0,255,255,75);
 			ofCircle(x, y, 10);
-			
+
 			ofSetHexColor(0x000000);
 			if(candidateBlob.id >= 10) x -= 4;
 			ofDrawBitmapString(ofToString(candidateBlob.id),x-4,y+5);
 		}
 		ofDisableAlphaBlending();
-	}	
+	}
 }
