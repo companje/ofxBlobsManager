@@ -18,8 +18,8 @@ public:
 	int dis; //used to sort on distance and to find the closest blob to merge with
     ofPoint pCentroid;
 
-    ofPoint tip,tail;
-    ofPoint pTip,pTail;
+    //ofPoint tip,tail;
+    //ofPoint pTip,pTail;
 
 	ofxStoredBlobVO(ofxCvBlob& newBlob);
 	void update(ofxCvBlob& newBlob);

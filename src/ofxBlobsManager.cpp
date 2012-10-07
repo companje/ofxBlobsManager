@@ -40,8 +40,8 @@ void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
     for( int i = 0; i < blobs.size(); i++ ) {
 		ofxStoredBlobVO& b = blobs.at(i);
 		b.pCentroid = b.centroid;
-        b.pTip = b.tip;
-        b.pTail = b.tail;
+        //b.pTip = b.tip;
+        //b.pTail = b.tail;
     }
 
 	//cout << "  loop new blobs (" << numNewBlobs << ")" << endl;
@@ -275,19 +275,19 @@ void ofxBlobsManager::debugDraw(int baseX, int baseY, int inputWidth, int inputH
 
 		ofSetHexColor(0xffffff);
 		if(blob.id >= 10) x -= 4;
-		ofDrawBitmapString(ofToString(blob.pTip),x-4,y+5); //blob.id
+        ofDrawBitmapString(ofToString(blob.id),x-4,y+5);
 
-        //tip
-		x = baseX+blob.tip.x*scaleX;
-		y = baseY+blob.tip.y*scaleY;
-
-		ofFill();
-		ofSetHexColor(0x00ff00);
-		ofCircle(x, y, 5);
-
-		//tail
-		x = baseX+blob.tail.x*scaleX;
-		y = baseY+blob.tail.y*scaleY;
+        ////tip
+        //x = baseX+blob.tip.x*scaleX;
+        //y = baseY+blob.tip.y*scaleY;
+        //
+        //ofFill();
+        //ofSetHexColor(0x00ff00);
+        //ofCircle(x, y, 5);
+        //
+        ////tail
+        //x = baseX+blob.tail.x*scaleX;
+        //y = baseY+blob.tail.y*scaleY;
 
 		ofFill();
 		ofSetHexColor(0xffff00);
