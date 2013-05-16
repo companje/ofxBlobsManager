@@ -43,7 +43,10 @@ public:
 
 	// the final resulting blobs
 	vector<ofxStoredBlobVO> blobs;
-
+    
+    //copies of recently deleted blobs automatically emptied on each update
+    vector<ofxStoredBlobVO> lastRemovedBlobs;
+    
 	// possible new blobs
 	vector<ofxStoredBlobVO> candidateBlobs;
 

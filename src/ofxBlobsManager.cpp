@@ -31,6 +31,8 @@ bool sortBlobsOnDis(ofxStoredBlobVO* blob1, ofxStoredBlobVO* blob2)
 }
 void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 {
+    lastRemovedBlobs.clear();
+
 	//cout << "BlobsManager::update" << endl;
 	int numNewBlobs = newBlobs.size();
 
@@ -136,6 +138,9 @@ void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 			if(undetectedTime > maxUndetectedTime)
 			{
 				//cout << "      to long undetected" << endl;
+                //cout << "candidate REMOVE ME" << endl;
+
+
 				removeBlob(candidateBlob,candidateBlobs);
 				i--;
 			}
@@ -170,7 +175,10 @@ void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 		//cout << "    local maxUndetectedTime: " << maxUndetectedTime << endl;
 		if(undetectedTime > maxUndetectedTime)
 		{
-			removeBlob(blob,blobs);
+            //cout << "existing one REMOVE ME" << endl;
+
+            lastRemovedBlobs.push_back(blob); //make a copy
+			removeBlob(blob,blobs); //delete original
 			i--;
 		}
 	}
@@ -275,7 +283,7 @@ void ofxBlobsManager::debugDraw(int baseX, int baseY, int inputWidth, int inputH
 
 		ofSetHexColor(0xffffff);
 		if(blob.id >= 10) x -= 4;
-        ofDrawBitmapString(ofToString(blob.id),x-4,y+5);
+        ofDrawBitmapString("     age: " + ofToString(blob.age),x-4,y+5);
 
         ////tip
         //x = baseX+blob.tip.x*scaleX;

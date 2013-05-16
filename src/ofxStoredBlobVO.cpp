@@ -10,8 +10,9 @@
 ofxStoredBlobVO::ofxStoredBlobVO(ofxCvBlob& newBlob)
 {
 	// a quick "shallow" copy
+    age = 0;
 	update(newBlob);
-
+    firstPos = centroid;
 
 	id = -1;
 	lastDetectedTime = 0;
@@ -31,6 +32,8 @@ void ofxStoredBlobVO::update(ofxCvBlob& newBlob)
 	hole = newBlob.hole;
 	pts = newBlob.pts;
 	nPts = newBlob.nPts;
+    
+    age++;
 
     //    ofPoint *tip = NULL;
     //    ofPoint *tail = NULL;

@@ -17,6 +17,8 @@ public:
 	int iniDetectedTime; // the time when it was first detected
 	int dis; //used to sort on distance and to find the closest blob to merge with
     ofPoint pCentroid;
+    ofPoint firstPos;
+    int age;
 
     //ofPoint tip,tail;
     //ofPoint pTip,pTail;
