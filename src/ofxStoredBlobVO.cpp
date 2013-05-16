@@ -6,6 +6,8 @@
 
 #include "ofxStoredBlobVO.h"
 
+ofPoint ofxStoredBlobVO::center; //center of sphere
+float ofxStoredBlobVO::tipSmoothingFactor = .9f;
 
 ofxStoredBlobVO::ofxStoredBlobVO(ofxCvBlob& newBlob)
 {
@@ -25,34 +27,31 @@ void ofxStoredBlobVO::update(ofxCvBlob& newBlob)
 	length = newBlob.length;
 	boundingRect = newBlob.boundingRect;
 	pCentroid = centroid;
-	//pTip = tip;
-	//pTail = tail;
 
 	centroid = newBlob.centroid;
 	hole = newBlob.hole;
 	pts = newBlob.pts;
 	nPts = newBlob.nPts;
-    
+
     age++;
 
-    //    ofPoint *tip = NULL;
-    //    ofPoint *tail = NULL;
-    //    ofPoint center(320,240); //center of sphere
-    //
-    //    for (int j=0; j<newBlob.nPts; j++) {
-    //        ofPoint &p = newBlob.pts.at(j);
-    //        if (!tip || p.distance(center) < tip->distance(center)) tip = &p;
-    //        if (!tail || p.distance(center) > tail->distance(center)) tail = &p;
-    //    }
-    //
-    //    if (tip) {
-    //        this->tip = *tip;
-    //        //if (pTip.x==0) pTip = *tip;
-    //    }
-    //
-    //    if (tail) {
-    //        this->tail = *tail;
-    //        //if (pTail.x==0) pTail = *tail;
-    //    }
 
+    //NOTE: find blob point nearest to center and average through time (make sure blob clustering is disabled)
+	pTip = tip;
+    ofPoint *localTip = NULL;
+
+    for (int j=0; j<newBlob.nPts; j++) {
+        ofPoint &p = newBlob.pts.at(j);
+        if (!localTip || p.distance(center) < localTip->distance(center)) localTip = &p;
+    }
+
+    if (localTip) {
+        if (tip.x==0) {
+            pTip = tip = *localTip;
+        } else {
+            tip.x = pTip.x * f + localTip->x * (1 - f);
+            tip.y = pTip.y * f + localTip->y * (1 - f);
+        }
+
+    }
 }

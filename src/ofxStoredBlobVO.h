@@ -20,8 +20,11 @@ public:
     ofPoint firstPos;
     int age;
 
-    //ofPoint tip,tail;
-    //ofPoint pTip,pTail;
+    ofPoint tip;
+    ofPoint pTip;
+
+    static ofPoint center;
+    static float tipSmoothingFactor;
 
 	ofxStoredBlobVO(ofxCvBlob& newBlob);
 	void update(ofxCvBlob& newBlob);

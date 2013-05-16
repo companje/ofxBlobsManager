@@ -86,6 +86,7 @@ void ofxBlobsManager::update(vector<ofxCvBlob>& newBlobs)
 					//cout << "      found matching candidate blob: " << closestCandidateBlob->id << endl;
 					closestCandidateBlob->update(newBlob);
 					closestCandidateBlob->lastDetectedTime = currentTime;
+
 				}
 				else
 				{
@@ -279,27 +280,19 @@ void ofxBlobsManager::debugDraw(int baseX, int baseY, int inputWidth, int inputH
 
 		ofFill();
 		ofSetHexColor(0x00ffff);
-		//ofCircle(x, y, 10);
+		ofCircle(x, y, 10);
 
 		ofSetHexColor(0xffffff);
 		if(blob.id >= 10) x -= 4;
         ofDrawBitmapString("     age: " + ofToString(blob.age),x-4,y+5);
 
-        ////tip
-        //x = baseX+blob.tip.x*scaleX;
-        //y = baseY+blob.tip.y*scaleY;
-        //
-        //ofFill();
-        //ofSetHexColor(0x00ff00);
-        //ofCircle(x, y, 5);
-        //
-        ////tail
-        //x = baseX+blob.tail.x*scaleX;
-        //y = baseY+blob.tail.y*scaleY;
+        //tip
+        x = baseX+blob.tip.x*scaleX;
+        y = baseY+blob.tip.y*scaleY;
 
-		ofFill();
-		ofSetHexColor(0xffff00);
-		ofCircle(x, y, 5);
+        ofFill();
+        ofSetHexColor(0x00ff00);
+        ofCircle(x, y, 5);
 	}
 
 	if(debugDrawCandidates)
