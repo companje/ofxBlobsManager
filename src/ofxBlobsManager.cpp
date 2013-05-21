@@ -286,7 +286,16 @@ void ofxBlobsManager::debugDraw(int baseX, int baseY, int inputWidth, int inputH
 		if(blob.id >= 10) x -= 4;
         ofDrawBitmapString("     age: " + ofToString(blob.age),x-4,y+5);
 
-        //tip
+        //tip history
+        for (int j=0; j<blob.tipHistory.size(); j++) {
+            x = baseX+blob.tipHistory.at(j).x*scaleX;
+            y = baseY+blob.tipHistory.at(j).y*scaleY;
+            ofFill();
+            ofSetHexColor(0x0000ff);
+            ofCircle(x, y, 3);
+        }
+
+        //green tip
         x = baseX+blob.tip.x*scaleX;
         y = baseY+blob.tip.y*scaleY;
 

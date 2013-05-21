@@ -19,12 +19,14 @@ public:
     ofPoint pCentroid;
     ofPoint firstPos;
     int age;
+    deque<ofPoint> tipHistory;
 
     ofPoint tip;
     ofPoint pTip;
 
     static ofPoint center;
     static float tipSmoothingFactor;
+    static int tipHistorySize;
 
 	ofxStoredBlobVO(ofxCvBlob& newBlob);
 	void update(ofxCvBlob& newBlob);

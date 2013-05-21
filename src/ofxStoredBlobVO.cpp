@@ -8,6 +8,7 @@
 
 ofPoint ofxStoredBlobVO::center; //center of sphere
 float ofxStoredBlobVO::tipSmoothingFactor = .9f;
+int ofxStoredBlobVO::tipHistorySize = 20;
 
 ofxStoredBlobVO::ofxStoredBlobVO(ofxCvBlob& newBlob)
 {
@@ -49,9 +50,11 @@ void ofxStoredBlobVO::update(ofxCvBlob& newBlob)
         if (tip.x==0) {
             pTip = tip = *localTip;
         } else {
-            tip.x = pTip.x * f + localTip->x * (1 - f);
-            tip.y = pTip.y * f + localTip->y * (1 - f);
+            tip.x = pTip.x * tipSmoothingFactor + localTip->x * (1 - tipSmoothingFactor);
+            tip.y = pTip.y * tipSmoothingFactor + localTip->y * (1 - tipSmoothingFactor);
         }
-
     }
+
+    tipHistory.push_back(tip);
+    if (tipHistory.size()>tipHistorySize) tipHistory.pop_front();
 }
